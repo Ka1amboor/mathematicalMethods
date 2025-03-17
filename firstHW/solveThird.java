@@ -1,79 +1,142 @@
 package org.example;
 
-
 public class Main {
-    /*................................................ R E G I O N                 F I R S T       F U N C T I O N .................................................*/
-    // Первая функция: x^3 + 3*x^2 - 1
-    //корни по Desmos: -2.9, -0.65, 0.53 рассматриваем интервалы где есть эти точки
-    static double functionFirst(double x) {
-        return Math.pow(x, 3) + 3 * Math.pow(x, 2) - 1;
-    }
 
-    static double gFirst(double x) {
-        return Math.sqrt((1 - Math.pow(x, 3)) / 3);
-    }
-
-    /*................................................ R E G I O N                 S E C O N D     F U N C T I O N .................................................*/
-    // Вторая функция: x^4 - x^3
-    static double functionSecond(double x) {
-        return Math.pow(x, 4) - Math.pow(x, 3);
-    }
-
-    static double gSecond(double x) {
-        return Math.pow(x, (double) 4 / 3);
-    }
-
-    /*................................................ R E G I O N                 T H I R D     F U N C T I O N .................................................*/
-    // Третья функция: x^2 - 3*x + 2
-    //корни 1 и 2
-    static double functionThird(double x) {
-        return Math.pow(x, 2) - 3 * x + 2;
-    }
-
-    static double gThird(double x) {
-        return Math.sqrt(3 * x - 2);
-    }
-
-    // Метод простых итераций для нахождения корня уравнения
-    public static double simpleIterationMethodFirst(double initialGuess, double epsilon) {
+    // Метод простой итерации с индивидуальным лямбда
+    public static double simpleIteration(double initialGuess, double lambda, double epsilon) {
         double x = initialGuess;
-        double xPrevious;
-        do {
-            xPrevious = x;
-            x = gFirst(xPrevious);
-        } while (Math.abs(x - xPrevious) > epsilon);
-        return x;
+        int maxIterations = 1000;
+
+        for (int i = 0; i < maxIterations; i++) {
+            double xNext = x + lambda * (Math.pow(x, 3) + 3 * Math.pow(x, 2) - 1);
+
+            if (Math.abs(xNext - x) < epsilon) {
+                return xNext;
+            }
+
+            x = xNext;
+        }
+
+        throw new RuntimeException("Метод не сошелся за " + maxIterations + " итераций");
     }
 
-    public static double simpleIterationMethodSecond(double initialGuess, double epsilon) {
+    public static double simpleIterationB(double initialGuess, double alpha, double epsilon) {
         double x = initialGuess;
-        double xPrevious;
-        do {
-            xPrevious = x;
-            x = gSecond(xPrevious);
-        } while (Math.abs(x - xPrevious) > epsilon);
-        return x;
+        int maxIterations = 10000;
+        for (int i = 0; i < maxIterations; i++) {
+            double xNext = x  + alpha * Math.pow(x, 4) - Math.pow(x, 3);
+            if(Math.abs(xNext - x) < epsilon) {
+                return xNext;
+            }
+            x = xNext;
+        }
+        throw new RuntimeException("Метод не сошелся за " + maxIterations + " итераций");
     }
 
-    public static double simpleIterationMethodThird(double initialGuess, double epsilon) {
+    public static double simpleIterationC(double initialGuess, double alpha, double epsilon) {
         double x = initialGuess;
-        double xPrevious;
-        do {
-            xPrevious = x;
-            x = gThird(xPrevious);
-        } while (Math.abs(x - xPrevious) > epsilon);
-        return x;
+        int maxIterations = 10000;
+        for (int i = 0; i < maxIterations; i++) {
+            double xNext = x  + alpha * Math.pow(x,2) - alpha * 3 * x + 2 * alpha;
+            if(Math.abs(xNext - x) < epsilon) {
+                return xNext;
+            }
+            x = xNext;
+        }
+        throw new RuntimeException("Метод не сошелся за " + maxIterations + " итераций");
+    }
+
+
+    // Проверка на сходимость метода в данной точке
+    public static boolean isConverging(double x, double lambda) {
+        double derivative = Math.abs(1 + lambda * (3 * x * x + 6 * x));
+        return derivative < 1;
+    }
+
+    public static boolean isConvergingB(double x, double lambda) {
+        double derivative = Math.abs(1 + lambda * (4* Math.pow(x, 3) - 3 * Math.pow(x, 2)));
+        return derivative < 1;
+    }
+
+    public static boolean isConvergingC(double x, double lambda) {
+        double derivative = Math.abs(1 + lambda * 2 * x - 3 * lambda);
+        return derivative < 1;
     }
 
     public static void main(String[] args) {
-
-        double firstInitialGuess = 1.0;
-        double secondInitialGuess = 0.5; //?у меня вопросы
-        double thirdInitialGuess = 3.0;
         double epsilon = 1e-6;
 
-        System.out.println("Найденный корень: " + simpleIterationMethodFirst(firstInitialGuess, epsilon));
-        System.out.println("Найденный корень: " + simpleIterationMethodSecond(secondInitialGuess, epsilon));
-        System.out.println("Найденный корень: " + simpleIterationMethodThird(thirdInitialGuess, epsilon));
+        // Подбираем лямбда для каждого начального приближения
+        double[][] initialGuessesWithLambdas = {
+                {-3.0, -0.01},
+                {-1.0, 0.01},
+                {0.5, -0.01}
+        };
+
+        for (double[] pair : initialGuessesWithLambdas) {
+            double guess = pair[0];
+            double lambda = pair[1];
+
+            if (!isConverging(guess, lambda)) {
+                System.out.println("Метод может не сойтись для x0 = " + guess);
+                continue;
+            }
+
+            try {
+                double root = simpleIteration(guess, lambda, epsilon);
+//                if(Math.abs(root) < 0.5) {
+//                    root = 0.0;
+//                }
+                System.out.println("Найденный корень: x ≈ " + root);
+            } catch (RuntimeException e) {
+                System.out.println("Ошибка для x0 = " + guess + ": " + e.getMessage());
+            }
+        }
+
+        double[][] initialGuessesWithLambdasB = {
+                {1.0, -0.01},
+                {1.3, -0.05},
+
+        };
+
+        for (double[] pair : initialGuessesWithLambdasB) {
+            double guess = pair[0];
+            double lambda = pair[1];
+
+            if (!isConvergingB(guess, lambda)) {
+                System.out.println("Метод может не сойтись для x0 = " + guess);
+                continue;
+            }
+
+            try {
+                double root = simpleIterationB(guess, lambda, epsilon);
+                System.out.println("Найденный корень: x ≈ " + root);
+            } catch (RuntimeException e) {
+                System.out.println("Ошибка для x0 = " + guess + ": " + e.getMessage());
+            }
+        }
+
+        double[][] initialGuessesWithLambdasC = {
+                {0.7, 0.01},
+                {2.5, -0.05},
+
+        };
+
+        for (double[] pair : initialGuessesWithLambdasC) {
+            double guess = pair[0];
+            double lambda = pair[1];
+
+            if (!isConvergingC(guess, lambda)) {
+                System.out.println("Метод может не сойтись для x0 = " + guess);
+                continue;
+            }
+
+            try {
+                double root = simpleIterationC(guess, lambda, epsilon);
+                System.out.println("Найденный корень: x ≈ " + root);
+            } catch (RuntimeException e) {
+                System.out.println("Ошибка для x0 = " + guess + ": " + e.getMessage());
+            }
+        }
     }
 }
