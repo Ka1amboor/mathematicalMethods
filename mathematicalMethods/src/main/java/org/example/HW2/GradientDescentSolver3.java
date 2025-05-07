@@ -12,42 +12,42 @@ public class GradientDescentSolver3 {
         };
         double[] b = {2, 0};
         double[] xInitial = {0, 0}; // Начальное приближение
-        double alpha = 0.1; // Шаг обучения
-        double epsilon = 1e-6; // Точность
-        int maxIterations = 1000;
+        double alpha = 0.4;
+        double epsilon = 1e-6;
 
-        // Решение аналитически
-        double[] analyticX = {1, 1};
-        System.out.println("Аналитическое решение: " + Arrays.toString(analyticX));
 
         // Градиентный спуск
-        double[] x = gradientDescent(A, b, xInitial, alpha, maxIterations, epsilon);
+        double[] x = gradientDescent(A, b, xInitial, alpha, epsilon);
         System.out.println("Результат градиентного метода: " + Arrays.toString(x));
     }
 
     // Градиентный спуск
     private static double[] gradientDescent(double[][] A, double[] b, double[] x0,
-                                            double alpha, int maxIter, double epsilon) {
+                                            double alpha, double epsilon) {
         int m = x0.length;
         double[] x = Arrays.copyOf(x0, m);
+        int iter = 0;
 
-        for (int iter = 0; iter < maxIter; iter++) {
+        while(true) {
             double[] grad = computeGradient(A, b, x);
 
             if (norm(grad) < epsilon) {
-                System.out.println("Сходимость достигнута на итерации " + iter);
+                System.out.println("Сходимость достигнута");
                 break;
             }
+
 
             // Обновление x: x = x - alpha * grad
             for (int i = 0; i < m; i++) {
                 x[i] -= alpha * grad[i];
             }
+            iter++;
         }
+        System.out.println("Итерация:" + iter + 1);
         return x;
     }
 
-    // Вычисление градиента: 2*A^T*(A*x - b)
+    // Вычисление градиента: 2*(A*x - b)*A^T
     private static double[] computeGradient(double[][] A, double[] b, double[] x) {
         double[] AxMinusB = matrixVectorMultiply(A, x);
         for (int i = 0; i < AxMinusB.length; i++) {

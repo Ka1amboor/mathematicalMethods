@@ -14,12 +14,12 @@ public class SteepestDescent1 {
         double[] b = {0, 5, 0, 6, -2, 6};
         double[] x = new double[6]; // Начальное приближение (нулевой вектор)
         double epsilon = 1e-6;
+        int  iter = 1;
 
         double[] grad;
-        int maxIterations = 1000;
 
-        for (int iter = 0; iter < maxIterations; iter++) {
-            grad = subtract(matrixVectorMultiply(A, x), b);
+        while(true) {
+            grad = (subtract(matrixVectorMultiply(A, x), b));
 
             if (norm(grad) < epsilon) {
                 System.out.println("Сошлось на итерации: " + iter);
@@ -30,6 +30,7 @@ public class SteepestDescent1 {
             double alpha = dotProduct(d, d) / dotProduct(d, matrixVectorMultiply(A, d));
 
             x = vectorAdd(x, vectorMultiply(d, alpha));
+            iter++;
         }
 
         System.out.println("Решение x:");

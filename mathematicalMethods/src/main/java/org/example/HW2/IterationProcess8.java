@@ -45,13 +45,13 @@ public class IterationProcess8 {
     //минимальных невязок
     public static double[] solveMinimalResidual(double[][] A, double[] b, double epsilon) {
         double[] x = new double[SIZE];
-        x = new double[]{0.5, 0.5, 0.5, 0.5};// Начальное приближение [0, 0, 0, 0]
+        x = new double[]{0.0, 0.0, 0.0, 0.0};// Начальное приближение [0, 0, 0, 0]
         double[] r = subtract(multiply(A, x), b);
         amountOfOperations = 0;
 
         while (getNorm(r) > epsilon && amountOfOperations < K_MAX) {
             double[] Ar = multiply(A, r);
-            double tau = multiply(r, Ar) / multiply(Ar, Ar);
+            double tau = (multiply(r, Ar) / multiply(Ar, Ar));
             x = subtract(x, scalarMultiply(r, tau));
             r = subtract(multiply(A, x), b);
             amountOfOperations++;
@@ -67,7 +67,7 @@ public class IterationProcess8 {
 
         while (getNorm(r) > epsilon && amountOfOperations < K_MAX) {
             double[] Ar = multiply(A, r);
-            double tau = multiply(r, r) / multiply(r, Ar);
+            double tau = (multiply(r, r) / multiply(r, Ar));
             x = subtract(x, scalarMultiply(r, tau));
             r = subtract(multiply(A, x), b);
             amountOfOperations++;

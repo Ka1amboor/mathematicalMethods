@@ -1,14 +1,14 @@
 package org.example.HW2;
 
 import java.util.Arrays;
-
 public class GradientDescent2 {
 
     public static void main(String[] args) {
-        // Тестовые данные (2D пример)
+        
         double[][] points = {
-                {0, 0},
+                {3, 1},
                 {2, 2}
+
         };
 
         // Аналитическое решение
@@ -16,14 +16,14 @@ public class GradientDescent2 {
         System.out.println("Аналитическое решение: " + Arrays.toString(analyticSolution));
 
         // Градиентный метод
-        double[] initialGuess = {5, 5}; // Начальное приближение
-        double alpha = 0.1; // Шаг обучения
-        double[] gradientSolution = gradientDescent(points, initialGuess, alpha, 1000, 1e-6);
+        double[] initialGuess = {0, 0}; // Начальное приближение
+        double alpha = 0.1;
+        double[] gradientSolution = gradientDescent(points, initialGuess, alpha, 1e-6);
 
-        System.out.println("Градиентное решение: " + Arrays.toString(gradientSolution));
+        System.out.println("Решение с помощью градиентного спуска: " + Arrays.toString(gradientSolution));
     }
 
-    // Аналитическое решение (среднее по координатам)
+    // Аналитическое решение (среднее арифметическое)
     private static double[] computeAnalyticSolution(double[][] points) {
         int n = points[0].length;
         double[] sum = new double[n];
@@ -40,24 +40,23 @@ public class GradientDescent2 {
 
     // Градиентный спуск
     private static double[] gradientDescent(double[][] points, double[] initial,
-                                            double alpha, int maxIter, double epsilon) {
+                                            double alpha, double epsilon) {
         int n = initial.length;
         int p = points.length;
         double[] x = Arrays.copyOf(initial, n);
 
-        for (int iter = 0; iter < maxIter; iter++) {
+        while(true) {
             double[] grad = new double[n];
 
-            // Вычисление градиента: 2 * (p * x - sum(x_k))
+            // Вычисление градиента: 2*(p * x - sum(x_k))
             for (int i = 0; i < n; i++) {
                 double sum = 0;
                 for (double[] point : points) {
                     sum += point[i];
                 }
-                grad[i] = 2 * (p * x[i] - sum);
+                grad[i] = 2*(p * x[i] - sum);
             }
 
-            // Проверка сходимости
             if (norm(grad) < epsilon) break;
 
             // Обновление x: x = x - alpha * grad

@@ -1,18 +1,27 @@
 package org.example.HW2;
 
+import javax.accessibility.AccessibleKeyBinding;
 import java.util.Arrays;
 
 import java.util.Arrays;
-//TODO:перепроверить сходится но решение неверное
+
 public class IterationMethodConvergence5 {
 
     public static void main(String[] args) {
         // Матрица B (5B из условия)
-        double[][] B = {
+        double[][] BFive = {
                 {5, -5, 0},
                 {10, 15, 20},
                 {-25, 0, 35}
         };
+
+        double[][] B = {
+                {1, -1, 0},
+                {2, 3, 4},
+                {-5, 0, 7}
+        };
+
+
 
         // Матрица A
         double[][] A = {
@@ -26,53 +35,50 @@ public class IterationMethodConvergence5 {
 
         // Начальное приближение
         double[] y0 = {0, 0, 0};
-        int maxIterations = 10000;
         double tolerance = 1e-6;
 
         // Запуск итерационного процесса
-        double[] solution = iterate(B, A, f, y0, maxIterations, tolerance);
+        double[] solution = iterate(BFive, A, f, y0, tolerance, B);
 
         System.out.println("Приближенное решение: " + Arrays.toString(solution));
     }
 
     // Итерационный процесс
-    private static double[] iterate(double[][] B, double[][] A, double[] f,
-                                    double[] y0, int maxIter, double tol) {
+    private static double[] iterate(double[][] BFive, double[][] A, double[] f,
+                                    double[] y0, double tol, double[][] B) {
         int n = y0.length;
         double[] yCurrent = Arrays.copyOf(y0, n);
 
         // Вычисление матрицы перехода C = (5B - A)/5 и B^{-1}
-        double[][] fiveBMinusA = subtractMatrices(multiplyMatrixByScalar(B, 5), A);
+        double[][] fiveBMinusA = subtractMatrices(BFive, A);
         double[][] BInv = invertMatrix(B);
 
         // Матрица C = (1/5) * B^{-1} * (5B - A)
         double[][] C = multiplyMatrices(BInv, fiveBMinusA);
         C = multiplyMatrixByScalar(C, 0.2);
 
+        if(check(C)) {
+            System.out.println("Метод расходится! Проверьте условие сходимости.");
+            return yCurrent;
+        }
+
         // Вектор d = (1/5) * B^{-1} * f
         double[] d = matrixVectorMultiply(BInv, f);
         d = multiplyVectorByScalar(d, 0.2);
 
-        for (int iter = 0; iter < maxIter; iter++) {
+        while(true) {
+            int iter = 0;
             double[] yNext = vectorAdd(matrixVectorMultiply(C, yCurrent), d);
 
-            // Проверка на расходимость
-            if (norm(yNext) > 1e10) {
-                System.out.println("Метод расходится! Проверьте условие сходимости.");
-                return yNext;
-            }
 
             // Проверка сходимости
             if (norm(vectorSubtract(yNext, yCurrent)) < tol) {
                 System.out.println("Сходимость достигнута на итерации " + iter);
                 return yNext;
             }
-
+            iter++;
             yCurrent = yNext;
         }
-
-        System.out.println("Достигнуто максимальное число итераций.");
-        return yCurrent;
     }
 
     // Норма вектора
@@ -219,9 +225,16 @@ public class IterationMethodConvergence5 {
         return result;
     }
 
+    private static boolean check(double [][] matrix) {
+        boolean flag = false;
+        for (int i = 0 ;i < matrix.length; i++) {
+            for(int j = 0; j < matrix[i].length; j++) {
+                if(Math.abs(matrix[i][j]) > 1) {
+                    flag = true;
+                }
+            }
+        }
+        return flag;
+    }
 
-
-    // Остальные методы (invertMatrix, norm, vectorSubtract, matrixVectorMultiply,
-    // vectorAdd, multiplyMatrixByScalar, multiplyVectorByScalar, subtractMatrices, multiplyMatrices)
-    // остаются без изменений, как в предоставленном коде.
 }
